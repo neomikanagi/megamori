@@ -1,4 +1,4 @@
-name: Convert TXT to srs
+name: Convert TXT to SRS
 
 on:
   workflow_dispatch:
