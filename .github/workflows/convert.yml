@@ -24,8 +24,10 @@ jobs:
     - name: Run the conversion script
       run: python megamori.py
 
-    - name: Upload JSON to repository
-      uses: actions/upload-artifact@v3
-      with:
-        name: json-output
-        path: megamori.json
+    - name: Commit JSON file
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add megamori.json
+        git commit -m "Auto-update megamori.json"
+        git push
