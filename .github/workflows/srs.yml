@@ -2,11 +2,8 @@ name: Convert TXT to SRS
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - megamori.json
+  schedule:
+    - cron: '5 1 * * *'
 
 jobs:
   install-and-compile:
