@@ -1,4 +1,4 @@
-name: Convert TXT to SRS
+name: Convert JSON to SRS
 
 on:
   workflow_dispatch:
@@ -12,9 +12,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-      
-    - name: Delay for 1 minute
-      run: sleep 60
 
     - name: Install Sing-Box
       run: |
