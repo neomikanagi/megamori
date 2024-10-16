@@ -1,4 +1,4 @@
-name: Convert JSON to SRS
+name: Convert TXT to SRS
 
 on:
   workflow_dispatch:
@@ -11,22 +11,26 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Install Sing-Box
       run: |
         bash <(curl -fsSL https://sing-box.app/deb-install.sh)
 
-    - name: Compile Rule Set
+    - name: Download AdGuard DNS Filter
       run: |
-        sing-box rule-set compile --output megamori.srs megamori.json
+        curl -o adblockdns.txt https://raw.githubusercontent.com/217heidai/adblockfilters/main/rules/adblockdns.txt
+
+    - name: Convert AdGuard DNS Filter to megamori.srs
+      run: |
+        sing-box rule-set convert --type adguard --output megamori.srs adblockdns.txt
 
     - name: Commit and Push SRS file
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git add megamori.srs
-        git commit -m "Auto-update megamori.srs"
+        git add megamori.srs  # 只添加 megamori.srs 文件
+        git commit -m "Auto-update megamori.srs" || echo "No changes to commit"
         git push
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
