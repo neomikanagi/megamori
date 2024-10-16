@@ -6,7 +6,7 @@ url = "https://raw.githubusercontent.com/217heidai/adblockfilters/main/rules/adb
 response = requests.get(url)
 
 rules = {
-    "version": 1,
+    "version": 2,
     "rules": [
         {
             "domain": [],
