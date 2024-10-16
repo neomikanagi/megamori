@@ -19,18 +19,18 @@ jobs:
 
     - name: Download AdGuard DNS Filter
       run: |
-        curl -o adblockfilters.txt https://raw.githubusercontent.com/217heidai/adblockfilters/main/rules/adblockfilters.txt
+        curl -o adblockdns.txt https://raw.githubusercontent.com/217heidai/adblockfilters/main/rules/adblockdns.txt
 
     - name: Convert AdGuard DNS Filter to SRS
       run: |
-        sing-box rule-set convert --type adguard --output adblockfilters.srs adblockfilters.txt
+        sing-box rule-set convert --type adguard --output adblockdns.srs adblockdns.txt
 
     - name: Commit and Push SRS file
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git add adblockfilters.txt adblockfilters.srs
-        git commit -m "Auto-update adblockfilters.srs"
+        git add adblockdns.txt adblockdns.srs
+        git commit -m "Auto-update adblockdns.srs"
         git push
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
