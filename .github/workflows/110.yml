@@ -17,11 +17,11 @@ jobs:
       run: |
         bash <(curl -fsSL https://sing-box.app/deb-install.sh)
 
-    - name: Download AdGuard DNS Filter
+    - name: Download AdBlockFilters
       run: |
         curl -o adblockfilters.txt https://raw.githubusercontent.com/217heidai/adblockfilters/main/rules/adblockfilters.txt
 
-    - name: Convert AdGuard DNS Filter to SRS
+    - name: Convert AdBlockFilters to SRS
       run: |
         sing-box rule-set convert --type adguard --output adblockfilters.srs adblockfilters.txt
 
