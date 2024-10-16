@@ -3,33 +3,42 @@ name: Convert TXT to JSON
 on:
   workflow_dispatch:
   schedule:
-    - cron: '1 1 * * *'
+    - cron: '0 */8 * * *'  # Run every 8 hours
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
+    # Step 1: Checkout the repository
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
+    # Step 2: Set up Python environment
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
         python-version: '3.x'
 
+    # Step 3: Install dependencies
     - name: Install dependencies
       run: pip install requests
 
+    # Step 4: Run the Python conversion script
     - name: Run the conversion script
       run: python megamori.py
 
-    - name: Commit and Push JSON file
+    # Step 5: Check for changes and commit if necessary
+    - name: Check for changes
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git add megamori.json
-        git commit -m "Auto-update megamori.json"
-        git push
+        if git diff --cached --quiet; then
+          echo "No changes detected, skipping commit.";
+        else
+          git commit -m "Auto-update megamori.json"
+          git push
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
