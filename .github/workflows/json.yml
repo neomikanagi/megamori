@@ -29,16 +29,18 @@ jobs:
       run: python megamori.py
 
     # Step 5: Check for changes and commit if necessary
-    - name: Check for changes
+    - name: Check for changes and commit if necessary
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git add megamori.json
         if git diff --cached --quiet; then
-          echo "No changes detected, skipping commit.";
+          echo "No changes detected, skipping commit."
         else
           git commit -m "Auto-update megamori.json"
           git push
+        fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
