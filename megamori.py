@@ -27,15 +27,15 @@ if response.status_code == 200:
             # For JSON
             rules["rules"][0]["domain"].append(domain)
             rules["rules"][0]["domain_suffix"].append(f".{domain}")
-            # For module format, remove REJECT and change to "list" suffix
-            module_content.append(f"DOMAIN-SUFFIX,{domain},list")
+            # For module format (without REJECT and changed to .list)
+            module_content.append(f"DOMAIN-SUFFIX,{domain}")
 
 # Step 3: Write to a JSON file
 with open("megamori.json", "w") as json_file:
     json.dump(rules, json_file, indent=4)
 
-# Step 4: Write to a module file with DOMAIN-SUFFIX,domain.com,list format
-with open("megamori.module", "w") as module_file:
+# Step 4: Write to a module file with DOMAIN-SUFFIX,domain format and .list extension
+with open("megamori.list", "w") as module_file:
     module_file.write("\n".join(module_content))
 
-print("Conversion completed. Both megamori.json and megamori.module files have been generated.")
+print("Conversion completed. Both megamori.json and megamori.list files have been generated.")
