@@ -1,0 +1,44 @@
+name: Convert JSON to MODULE and Generate Lite Version
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */8 * * *'  # Run every 8 hours
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout the repository
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # Step 2: Set up Python environment
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    # Step 3: Install dependencies
+    - name: Install dependencies
+      run: pip install requests
+
+    # Step 4: Run the Python conversion script
+    - name: Run the conversion script
+      run: python ads-all-lite.py
+
+    # Step 5: Check for changes and commit if necessary
+    - name: Check for changes and commit if necessary
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add ads-all-lite.module
+        if git diff --cached --quiet; then
+          echo "No changes detected, skipping commit."
+        else
+          git commit -m "Auto-update ads-all-lite.module"
+          git push
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
