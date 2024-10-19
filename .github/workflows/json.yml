@@ -1,4 +1,4 @@
-name: Convert TXT to JSON and MODULE
+name: Convert TXT to JSON and LIST
 
 on:
   workflow_dispatch:
@@ -16,7 +16,7 @@ jobs:
 
     # Step 2: Set up Python environment
     - name: Set up Python
-      uses: actions/setup-python@v4  # Updated to v4
+      uses: actions/setup-python@v4
       with:
         python-version: '3.x'
 
@@ -39,6 +39,5 @@ jobs:
         else
           git commit -m "Auto-update megamori.json and megamori.module"
           git push
-        fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
