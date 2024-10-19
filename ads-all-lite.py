@@ -1,5 +1,6 @@
 import json
 import requests
+import os
 
 # Step 1: Fetch the JSON rules from the URL
 url = "https://raw.githubusercontent.com/lyc8503/sing-box-rules/rule-set-geosite/geosite-category-ads-all.json"
@@ -17,9 +18,11 @@ if response.status_code == 200:
             # For module format (without REJECT and changed to .list)
             module_content.add(f"DOMAIN-SUFFIX,{domain}")
 
-# Step 3: Read the existing megamori.module to remove duplicates
-with open("megamori.module", "r") as megamori_file:
-    megamori_domains = set(megamori_file.read().splitlines())
+# Step 3: Read the existing megamori.list to remove duplicates (if the file exists)
+megamori_domains = set()
+if os.path.exists("megamori.list"):
+    with open("megamori.list", "r") as megamori_file:
+        megamori_domains = set(megamori_file.read().splitlines())
 
 # Step 4: Remove duplicate domains
 unique_domains = module_content - megamori_domains
