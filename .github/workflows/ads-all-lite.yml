@@ -1,4 +1,4 @@
-name: Convert JSON to MODULE and Generate Lite Version
+name: Convert JSON to LIST and Generate Lite Version
 
 on:
   workflow_dispatch:
@@ -39,6 +39,5 @@ jobs:
         else
           git commit -m "Auto-update ads-all-lite.module"
           git push
-        fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
