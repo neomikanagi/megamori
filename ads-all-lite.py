@@ -14,8 +14,8 @@ if response.status_code == 200:
     for rule in data.get("rules", []):
         domains = rule.get("domain", [])
         for domain in domains:
-            # For module format
-            module_content.add(f"DOMAIN-SUFFIX,{domain},REJECT")
+            # For module format, remove REJECT and change to "list" suffix
+            module_content.add(f"DOMAIN-SUFFIX,{domain},list")
 
 # Step 3: Read the existing megamori.module to remove duplicates
 with open("megamori.module", "r") as megamori_file:
