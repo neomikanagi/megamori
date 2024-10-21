@@ -4,7 +4,7 @@ This project utilizes rules generated from the [AdBlock DNS Filters](https://git
 1. Every eight hours, the rules are automatically converted into a JSON file with `"version": 2` format.
 2. Every eight hours, the rules are automatically converted into an SRS binary file format for use with Sing-Box.
 3. A new list file is provided for Shadowrocket usage.
-4. The ads-all and this list contain a significant amount of overlap. The ads-all-lite.list is the remainder of ads-all after removing these duplicates.
+4. The ads-all and this list contain a significant amount of overlap. The ads-all-lite.list is the remainder of ads-all after removing these duplicates. I don't doubt the performance of mobile devices in handling this, but I have concerns about battery drain.
 
 I would like to extend my gratitude to the original authors for their contributions. I also want to acknowledge Mosney, who created the [anti-anti-AD](https://github.com/Mosney/anti-anti-AD) project to expose the discrepancies between the actual content of anti-AD lists and the claims made by its maintainer, gentlyxu.
 
