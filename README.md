@@ -15,4 +15,4 @@ If you have a stance on this issue and believe that the actions of the anti-AD m
 - SRS: [https://raw.githubusercontent.com/neomikanagi/megamori/main/megamori.srs](https://raw.githubusercontent.com/neomikanagi/megamori/main/megamori.srs)
 - JSON: [https://raw.githubusercontent.com/neomikanagi/megamori/main/megamori.json](https://raw.githubusercontent.com/neomikanagi/megamori/main/megamori.json)
 - SRS: [https://raw.githubusercontent.com/neomikanagi/megamori/main/megamori.list](https://raw.githubusercontent.com/neomikanagi/megamori/main/megamori.list)
-- LITE: [https://raw.githubusercontent.com/neomikanagi/megamori/main/ads-all-lite](https://raw.githubusercontent.com/neomikanagi/megamori/main/ads-all-lite)
+- LITE: [https://raw.githubusercontent.com/neomikanagi/megamori/main/ads-all-lite.list](https://raw.githubusercontent.com/neomikanagi/megamori/main/ads-all-lite.list)
