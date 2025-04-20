@@ -5,7 +5,6 @@ on:
   schedule:
     - cron: '0 */8 * * *'  # Run every 8 hours
 
-# Add concurrency to prevent parallel runs
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -36,14 +35,35 @@ jobs:
       run: |
         sing-box rule-set convert --type adguard --output megamori.srs adblockdns.txt
 
-    # Step 5: Pull latest changes, check for changes, and commit if necessary
-    - name: Commit and Push SRS file
+    # Step 5: Debug working directory
+    - name: Debug git status
+      run: |
+        git status
+        git diff
+
+    # Step 6: Commit changes before pulling
+    - name: Commit changes before pulling
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git pull --rebase origin main  # Pull latest changes before committing
         git add megamori.srs
-        git commit -m "Auto-update megamori.srs" || echo "No changes to commit"
+        if git diff --cached --quiet; then
+          echo "No changes detected, skipping commit."
+        else
+          git commit -m "Auto-update megamori.srs before pull"
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    # Step 7: Pull latest changes and push if necessary
+    - name: Pull and push changes
+      run: |
+        git pull --rebase origin main  # Pull latest changes
         git push
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    # Step 8: Clean up temporary files
+    - name: Clean up
+      run: |
+        rm -f adblockdns.txt
