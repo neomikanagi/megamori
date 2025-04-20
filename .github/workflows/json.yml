@@ -5,6 +5,11 @@ on:
   schedule:
     - cron: '0 */8 * * *'  # Run every 8 hours
 
+# Add concurrency to prevent parallel runs
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -13,6 +18,8 @@ jobs:
     # Step 1: Checkout the repository
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch full history to enable rebase
 
     # Step 2: Set up Python environment
     - name: Set up Python
@@ -28,11 +35,12 @@ jobs:
     - name: Run the conversion script
       run: python megamori.py
 
-    # Step 5: Check for changes and commit if necessary
-    - name: Check for changes and commit if necessary
+    # Step 5: Pull latest changes, check for changes, and commit if necessary
+    - name: Pull latest changes and commit
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git pull --rebase origin main  # Pull latest changes before committing
         git add megamori.json megamori.list
         if git diff --cached --quiet; then
           echo "No changes detected, skipping commit."
