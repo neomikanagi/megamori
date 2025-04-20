@@ -5,7 +5,6 @@ on:
   schedule:
     - cron: '30 */8 * * *'  # Run every 8 hours, offset by 30 minutes
 
-# Add concurrency to prevent parallel runs
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -35,18 +34,24 @@ jobs:
     - name: Run the conversion script
       run: python ads-all-lite.py
 
-    # Step 5: Pull latest changes, check for changes, and commit if necessary
-    - name: Check for changes and commit if necessary
+    # Step 5: Commit changes before pulling
+    - name: Commit changes before pulling
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git pull --rebase origin main  # Pull latest changes before committing
         git add ads-all-lite.list
         if git diff --cached --quiet; then
           echo "No changes detected, skipping commit."
         else
-          git commit -m "Auto-update ads-all-lite.list"
-          git push
+          git commit -m "Auto-update ads-all-lite.list before pull"
         fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    # Step 6: Pull latest changes and push if necessary
+    - name: Pull and push changes
+      run: |
+        git pull --rebase origin main  # Pull latest changes
+        git push
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
