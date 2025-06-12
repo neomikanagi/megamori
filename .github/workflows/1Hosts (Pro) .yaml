@@ -1,0 +1,69 @@
+name: 1Hosts (Pro)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */8 * * *'  # Run every 8 hours
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  install-and-compile:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout the repository
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch full history to enable rebase
+
+    # Step 2: Install Sing-Box
+    - name: Install Sing-Box
+      run: |
+        bash <(curl -fsSL https://sing-box.app/deb-install.sh)
+
+    # Step 3: Download Pro Adblock Filter
+    - name: Download Pro Adblock Filter
+      run: |
+        curl -o pro_adblock.txt https://o0.pages.dev/Pro/adblock.txt
+
+    # Step 4: Convert Pro Adblock Filter to SRS format
+    - name: Convert Pro Adblock Filter to pro_adblock.srs
+      run: |
+        sing-box rule-set convert --type adguard --output pro_adblock.srs pro_adblock.txt
+
+    # Step 5: Debug working directory
+    - name: Debug git status
+      run: |
+        git status
+        git diff
+
+    # Step 6: Commit changes before pulling
+    - name: Commit changes before pulling
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add pro_adblock.srs
+        if git diff --cached --quiet; then
+          echo "No changes detected, skipping commit."
+        else
+          git commit -m "Auto-update pro_adblock.srs before pull"
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    # Step 7: Pull latest changes and push if necessary
+    - name: Pull and push changes
+      run: |
+        git pull --rebase origin main  # Pull latest changes
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    # Step 8: Clean up temporary files
+    - name: Clean up
+      run: |
+        rm -f pro_adblock.txt
