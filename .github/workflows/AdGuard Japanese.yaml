@@ -1,0 +1,75 @@
+name: AdGuard Japanese
+
+on:
+  workflow_dispatch:  # 支持手动触发
+  schedule:
+    - cron: '0 */8 * * *'  # 每8小时运行一次
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true  # 取消正在进行的相同工作流
+
+jobs:
+  install-and-compile:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 步骤 1：检出代码
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 获取完整历史以支持 rebase
+
+      # 步骤 2：安装 Sing-Box
+      - name: Install Sing-Box
+        run: |
+          bash <(curl -fsSL https://sing-box.app/deb-install.sh)
+
+      # 步骤 3：下载 AdGuard Japanese 过滤器文件
+      - name: Download AdGuard Japanese Filter files
+        run: |
+          curl -o adservers.txt https://adguardteam.github.io/AdguardFilters/JapaneseFilter/sections/adservers.txt
+          curl -o adservers_firstparty.txt https://adguardteam.github.io/AdguardFilters/JapaneseFilter/sections/adservers_firstparty.txt
+
+      # 步骤 4：合并两个过滤器文件
+      - name: Merge filter files
+        run: |
+          cat adservers.txt adservers_firstparty.txt > adguard_japanese.txt
+
+      # 步骤 5：将合并后的文件转换为 SRS 格式
+      - name: Convert merged filter to adguard_japanese.srs
+        run: |
+          sing-box rule-set convert --type adguard --output adguard_japanese.srs adguard_japanese.txt
+
+      # 步骤 6：调试 Git 状态（可选）
+      - name: Debug git status
+        run: |
+          git status
+          git diff
+
+      # 步骤 7：在拉取前提交更改
+      - name: Commit changes before pulling
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add adguard_japanese.srs
+          if git diff --cached --quiet; then
+            echo "No changes detected, skipping commit."
+          else
+            git commit -m "Auto-update adguard_japanese.srs before pull"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 步骤 8：拉取最新更改并推送
+      - name: Pull and push changes
+        run: |
+          git pull --rebase origin main  # 拉取最新更改
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 步骤 9：清理临时文件
+      - name: Clean up
+        run: |
+          rm -f adservers.txt adservers_firstparty.txt adguard_japanese.txt
