@@ -33,7 +33,7 @@ jobs:
     # Step 4: Convert Pro Adblock Filter to SRS format
     - name: Convert Lite Adblock Filter to lite_adblock.srs
       run: |
-        sing-box rule-set convert --type adguard --output lite_adblock.srs lite_adblock.txt
+        sing-box rule-set convert --type adguard --output lite_adblock.srs adblock.txt
 
     # Step 5: Debug working directory
     - name: Debug git status
