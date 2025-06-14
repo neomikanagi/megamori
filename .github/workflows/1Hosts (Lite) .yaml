@@ -31,9 +31,9 @@ jobs:
         curl -o adblock_lite.txt https://o0.pages.dev/Lite/adblock.txt
 
     # Step 4: Convert Adblock Filter to SRS format
-    - name: Convert 1Hosts (Lite) to 1hosts_ite.srs
+    - name: Convert 1Hosts (Lite) to 1hosts_Lite.srs
       run: |
-        sing-box rule-set convert --type adguard --output 1hosts_ite.srs adblock_lite.txt
+        sing-box rule-set convert --type adguard --output 1hosts_Lite.srs adblock_lite.txt
 
     # Step 5: Debug working directory
     - name: Debug git status
@@ -46,11 +46,11 @@ jobs:
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git add 1hosts_ite.srs
+        git add 1hosts_Lite.srs
         if git diff --cached --quiet; then
           echo "No changes detected, skipping commit."
         else
-          git commit -m "Auto-update 1hosts_ite.srs before pull"
+          git commit -m "Auto-update 1hosts_Lite.srs before pull"
         fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
