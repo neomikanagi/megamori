@@ -25,15 +25,15 @@ jobs:
       run: |
         bash <(curl -fsSL https://sing-box.app/deb-install.sh)
 
-    # Step 3: Download Pro Adblock Filter
-    - name: Download Lite Adblock Filter
+    # Step 3: Download 1Hosts (Lite) Adblock Filter
+    - name: Download 1Hosts (Lite) Adblock Filter
       run: |
-        curl -o pro_adblock.txt https://o0.pages.dev/Lite/adblock.txt
+        curl -o adblock_lite.txt https://o0.pages.dev/Lite/adblock.txt
 
-    # Step 4: Convert Pro Adblock Filter to SRS format
-    - name: Convert Lite Adblock Filter to lite_adblock.srs
+    # Step 4: Convert Adblock Filter to SRS format
+    - name: Convert 1Hosts (Lite) to 1hosts_ite.srs
       run: |
-        sing-box rule-set convert --type adguard --output lite_adblock.srs adblock.txt
+        sing-box rule-set convert --type adguard --output 1hosts_ite.srs adblock_lite.txt
 
     # Step 5: Debug working directory
     - name: Debug git status
@@ -46,11 +46,11 @@ jobs:
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git add lite_adblock.srs
+        git add 1hosts_ite.srs
         if git diff --cached --quiet; then
           echo "No changes detected, skipping commit."
         else
-          git commit -m "Auto-update lite_adblock.srs before pull"
+          git commit -m "Auto-update 1hosts_ite.srs before pull"
         fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -66,4 +66,4 @@ jobs:
     # Step 8: Clean up temporary files
     - name: Clean up
       run: |
-        rm -f lite_adblock.txt
+        rm -f adblock_lite.txt
