@@ -1,4 +1,4 @@
-name: DNS Blocklists PRO++
+name: HaGeZi's Pro++ DNS Blocklist
 
 on:
   workflow_dispatch:
@@ -25,15 +25,15 @@ jobs:
       run: |
         bash <(curl -fsSL https://sing-box.app/deb-install.sh)
 
-    # Step 3: Download Pro Plus Adblock Filter
-    - name: Download Pro Plus Adblock Filter
+    # Step 3: Download HaGeZi Pro Plus Adblock Filter
+    - name: Download HaGeZi Pro Plus Adblock Filter
       run: |
-        curl -o pro_plus_adblock.txt https://gitlab.com/hagezi/mirror/-/raw/main/dns-blocklists/adblock/pro.plus.txt
+        curl -o hagezi_pro_plus_adblock.txt https://gitlab.com/hagezi/mirror/-/raw/main/dns-blocklists/adblock/pro.plus.txt
 
-    # Step 4: Convert Pro Plus Adblock Filter to SRS format
-    - name: Convert Pro Plus Adblock Filter to pro_plus_adblock.srs
+    # Step 4: Convert HaGeZi Pro Plus Adblock Filter to SRS format
+    - name: Convert HaGeZi Pro Plus Adblock Filter to hagezi_pro_plus_adblock.srs
       run: |
-        sing-box rule-set convert --type adguard --output pro_plus_adblock.srs pro_plus_adblock.txt
+        sing-box rule-set convert --type adguard --output hagezi_pro_plus_adblock.srs hagezi_pro_plus_adblock.txt
 
     # Step 5: Debug working directory
     - name: Debug git status
@@ -46,11 +46,11 @@ jobs:
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git add pro_plus_adblock.srs
+        git add hagezi_pro_plus_adblock.srs
         if git diff --cached --quiet; then
           echo "No changes detected, skipping commit."
         else
-          git commit -m "Auto-update pro_plus_adblock.srs before pull"
+          git commit -m "Auto-update hagezi_pro_plus_adblock.srs before pull"
         fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -66,4 +66,4 @@ jobs:
     # Step 8: Clean up temporary files
     - name: Clean up
       run: |
-        rm -f pro_plus_adblock.txt
+        rm -f hagezi_pro_plus_adblock.txt
