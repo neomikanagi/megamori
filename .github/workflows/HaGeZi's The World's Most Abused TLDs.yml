@@ -1,0 +1,69 @@
+name: HaGeZi's The World's Most Abused TLDs
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */8 * * *'  # Run every 8 hours
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  install-and-compile:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout the repository
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch full history to enable rebase
+
+    # Step 2: Install Sing-Box
+    - name: Install Sing-Box
+      run: |
+        bash <(curl -fsSL https://sing-box.app/deb-install.sh)
+
+    # Step 3: Download HaGeZi Spam TLDs Adblock Filter
+    - name: Download HaGeZi Spam TLDs Adblock Filter
+      run: |
+        curl -o hagezi_spam_tlds_adblock.txt https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/adblock/spam-tlds.txt
+
+    # Step 4: Convert HaGeZi Spam TLDs Adblock Filter to SRS format
+    - name: Convert HaGeZi Spam TLDs Adblock Filter to hagezi_spam_tlds_adblock.srs
+      run: |
+        sing-box rule-set convert --type adguard --output hagezi_spam_tlds_adblock.srs hagezi_spam_tlds_adblock.txt
+
+    # Step 5: Debug working directory
+    - name: Debug git status
+      run: |
+        git status
+        git diff
+
+    # Step 6: Commit changes before pulling
+    - name: Commit changes before pulling
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add hagezi_spam_tlds_adblock.srs
+        if git diff --cached --quiet; then
+          echo "No changes detected, skipping commit."
+        else
+          git commit -m "Auto-update hagezi_spam_tlds_adblock.srs before pull"
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    # Step 7: Pull latest changes and push if necessary
+    - name: Pull and push changes
+      run: |
+        git pull --rebase origin main  # Pull latest changes
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    # Step 8: Clean up temporary files
+    - name: Clean up
+      run: |
+        rm -f hagezi_spam_tlds_adblock.txt
