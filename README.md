@@ -17,6 +17,6 @@ If you have a stance on this issue and believe that the actions of the anti-AD m
 - LIST: [https://raw.githubusercontent.com/neomikanagi/megamori/main/megamori.list](https://raw.githubusercontent.com/neomikanagi/megamori/main/megamori.list)
 - LITE: [https://raw.githubusercontent.com/neomikanagi/megamori/main/ads-all-lite.list](https://raw.githubusercontent.com/neomikanagi/megamori/main/ads-all-lite.list)
 
-HaGeZi's Pro++ DNS Blocklist: [https://raw.githubusercontent.com/neomikanagi/megamori/main/hagezi_pro_plus_adblock.srs](https://raw.githubusercontent.com/neomikanagi/megamori/main/hagezi_pro_plus_adblock.srs)
-HaGeZi's Threat Intelligence Feeds DNS Blocklist: [https://raw.githubusercontent.com/neomikanagi/megamori/main/hagezi_tif_adblock.srs](https://raw.githubusercontent.com/neomikanagi/megamori/main/hagezi_tif_adblock.srs)
-HaGeZi's The World's Most Abused TLDs: [https://raw.githubusercontent.com/neomikanagi/megamori/main/hagezi_spam_tlds_adblock.srs](https://raw.githubusercontent.com/neomikanagi/megamori/main/hagezi_spam_tlds_adblock.srs)
+- HaGeZi's Pro++ DNS Blocklist: [https://raw.githubusercontent.com/neomikanagi/megamori/main/hagezi_pro_plus_adblock.srs](https://raw.githubusercontent.com/neomikanagi/megamori/main/hagezi_pro_plus_adblock.srs)
+- HaGeZi's Threat Intelligence Feeds DNS Blocklist: [https://raw.githubusercontent.com/neomikanagi/megamori/main/hagezi_tif_adblock.srs](https://raw.githubusercontent.com/neomikanagi/megamori/main/hagezi_tif_adblock.srs)
+- HaGeZi's The World's Most Abused TLDs: [https://raw.githubusercontent.com/neomikanagi/megamori/main/hagezi_spam_tlds_adblock.srs](https://raw.githubusercontent.com/neomikanagi/megamori/main/hagezi_spam_tlds_adblock.srs)
