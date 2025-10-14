@@ -20,3 +20,5 @@ If you have a stance on this issue and believe that the actions of the anti-AD m
 - HaGeZi's Pro++ DNS Blocklist: [https://raw.githubusercontent.com/neomikanagi/megamori/main/hagezi_pro_plus_adblock.srs](https://raw.githubusercontent.com/neomikanagi/megamori/main/hagezi_pro_plus_adblock.srs)
 - HaGeZi's Threat Intelligence Feeds DNS Blocklist: [https://raw.githubusercontent.com/neomikanagi/megamori/main/hagezi_tif_adblock.srs](https://raw.githubusercontent.com/neomikanagi/megamori/main/hagezi_tif_adblock.srs)
 - HaGeZi's The World's Most Abused TLDs: [https://raw.githubusercontent.com/neomikanagi/megamori/main/hagezi_spam_tlds_adblock.srs](https://raw.githubusercontent.com/neomikanagi/megamori/main/hagezi_spam_tlds_adblock.srs)
+- yokoffing's Privacy Essentials: [https://raw.githubusercontent.com/neomikanagi/megamori/main/yokoffing_privacy_essentials.srs](https://raw.githubusercontent.com/neomikanagi/megamori/main/yokoffing_privacy_essentials.srs)
+
