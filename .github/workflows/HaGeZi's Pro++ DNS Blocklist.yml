@@ -1,11 +1,10 @@
-name: HaGeZi's Pro++ DNS Blocklist (Debug Mode)
+name: HaGeZi's Pro++ DNS Blocklist (Final Fix)
 
 on:
-  workflow_dispatch:        # 允许手动触发
+  workflow_dispatch:
   schedule:
-    - cron: '0 */12 * * *'  # 每12小时自动运行
+    - cron: '0 */12 * * *'
 
-# 必须赋予写权限，否则无法提交
 permissions:
   contents: write
 
@@ -18,93 +17,65 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1. 检出代码
     - name: Checkout code
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
-    # 2. 安装 Sing-Box
     - name: Install Sing-Box
       run: |
-        echo "⬇️ 正在安装 Sing-box..."
         bash <(curl -fsSL https://sing-box.app/deb-install.sh)
-        sing-box version
 
-    # 3. 下载规则 (带大小检查)
-    - name: Download HaGeZi Pro Plus Adblock Filter
+    # 1. 下载 HaGeZi 官方提供的 Sing-box 专用 JSON 文件
+    # 相比 TXT，JSON 格式不仅包含规则，还包含了 metadata，兼容性 100%
+    - name: Download HaGeZi Pro Plus (JSON)
       run: |
-        echo "⬇️ 正在从 GitHub 官方源下载规则..."
-        # 使用 -fSL 确保遇到 404 直接报错
-        curl -fSL -o hagezi_pro_plus_adblock.txt https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/pro.plus.txt
+        echo "⬇️ 正在下载官方 Sing-box JSON 规则..."
+        curl -fSL -o hagezi_pro_plus.json https://raw.githubusercontent.com/hagezi/dns-blocklists/main/singbox/pro.plus.json
         
-        # --- 调试：打印文件详情 ---
-        echo "📊 下载后的 TXT 文件信息："
-        ls -lh hagezi_pro_plus_adblock.txt
-        
-        # --- 安全熔断检查 ---
-        filesize=$(wc -c <"hagezi_pro_plus_adblock.txt")
-        # 如果文件小于 50KB (正常应该有好几 MB)，强制报错
-        if [ $filesize -lt 51200 ]; then
-          echo "❌ 严重错误：下载的源文件太小 ($filesize bytes)，可能是网络问题或 404，终止运行！"
+        # 检查下载是否成功
+        ls -lh hagezi_pro_plus.json
+        filesize=$(wc -c <"hagezi_pro_plus.json")
+        if [ $filesize -lt 102400 ]; then
+          echo "❌ 下载失败：JSON 文件过小"
           exit 1
         fi
-        echo "✅ 源文件大小正常，准备转换。"
 
-    # 4. 转换规则 (带结果检查)
-    - name: Convert to SRS
+    # 2. 使用 compile 命令编译 JSON (这是最稳的方法)
+    - name: Compile JSON to SRS
       run: |
-        echo "🔄 正在转换格式 (TXT -> SRS)..."
-        # 使用 adguard 类型进行转换
-        sing-box rule-set convert --type adguard --output hagezi_pro_plus_adblock.srs hagezi_pro_plus_adblock.txt
+        echo "🔨 正在编译 (Compile) JSON -> SRS ..."
+        # 注意：这里用的是 compile，不是 convert
+        sing-box rule-set compile --output hagezi_pro_plus_adblock.srs hagezi_pro_plus.json
         
-        # --- 调试：打印转换后的文件详情 ---
-        echo "📊 转换后的 SRS 文件信息："
+        # 检查结果
+        echo "📊 编译结果："
         ls -lh hagezi_pro_plus_adblock.srs
         
-        # --- 安全熔断检查 ---
-        if [ ! -f hagezi_pro_plus_adblock.srs ]; then
-             echo "❌ 严重错误：SRS 文件未能生成！"
-             exit 1
-        fi
-        
         srs_size=$(wc -c <"hagezi_pro_plus_adblock.srs")
-        # 如果转换出的二进制文件小于 1KB，说明转换失败了
-        if [ $srs_size -lt 1024 ]; then
-          echo "❌ 严重错误：转换失败，生成的 SRS 文件几乎是空的 ($srs_size bytes)，禁止提交！"
+        # 正常的 srs 文件应该有几 MB
+        if [ $srs_size -lt 10240 ]; then
+          echo "❌ 编译失败：生成的 SRS 文件几乎是空的 ($srs_size bytes)"
           exit 1
         fi
-        echo "✅ 转换成功，SRS 文件有效。"
+        echo "✅ 编译成功！"
 
-    # 5. 提交并推送
     - name: Commit and Push
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        
-        # 强制将生成的文件添加到暂存区
         git add hagezi_pro_plus_adblock.srs
         
-        echo "🧐 正在检查 Git 状态..."
-        git status
-        
-        # 检查是否有变化
         if git diff --cached --quiet; then
-          echo "⚠️ 仓库中的文件与新生成的文件完全一致，没有变化，跳过提交。"
-          echo "💡 这意味着：你仓库里现有的文件已经是好的了(或者和新生成的一样)。"
+          echo "⚠️ 规则无变化，跳过提交"
         else
-          echo "🚀 检测到规则更新，文件大小已变化，正在提交..."
-          git commit -m "Auto-update: HaGeZi Pro++ ($(date +'%Y-%m-%d %H:%M'))"
-          
-          # 拉取最新代码防止冲突
+          git commit -m "Auto-update: HaGeZi Pro++ (JSON Source)"
           git pull --rebase origin main
           git push
-          echo "✅ 推送完成！"
         fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    # 6. 清理
     - name: Clean up
       run: |
-        rm -f hagezi_pro_plus_adblock.txt
+        rm -f hagezi_pro_plus.json
