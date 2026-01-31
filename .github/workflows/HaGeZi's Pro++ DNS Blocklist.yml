@@ -1,4 +1,4 @@
-name: HaGeZi's Pro++ DNS Blocklist (Final Fix)
+name: HaGeZi's Pro++ DNS Blocklist (Final)
 
 on:
   workflow_dispatch:
@@ -26,39 +26,71 @@ jobs:
       run: |
         bash <(curl -fsSL https://sing-box.app/deb-install.sh)
 
-    # 1. 下载 HaGeZi 官方提供的 Sing-box 专用 JSON 文件
-    # 相比 TXT，JSON 格式不仅包含规则，还包含了 metadata，兼容性 100%
-    - name: Download HaGeZi Pro Plus (JSON)
+    # 1. 下载纯域名格式 (Domains Format)
+    # 这种格式最干净，只有域名，没有干扰 Sing-box 的特殊符号
+    - name: Download HaGeZi Pro Plus (Domains)
       run: |
-        echo "⬇️ 正在下载官方 Sing-box JSON 规则..."
-        curl -fSL -o hagezi_pro_plus.json https://raw.githubusercontent.com/hagezi/dns-blocklists/main/singbox/pro.plus.json
+        echo "⬇️ 正在下载纯域名列表..."
+        # 这是 HaGeZi 官方的 Domains 格式链接
+        curl -fSL -o pro.plus.txt https://raw.githubusercontent.com/hagezi/dns-blocklists/main/domains/pro.plus.txt
         
-        # 检查下载是否成功
-        ls -lh hagezi_pro_plus.json
-        filesize=$(wc -c <"hagezi_pro_plus.json")
-        if [ $filesize -lt 102400 ]; then
-          echo "❌ 下载失败：JSON 文件过小"
+        ls -lh pro.plus.txt
+        # 简单检查大小
+        if [ $(wc -c <"pro.plus.txt") -lt 102400 ]; then
+          echo "❌ 下载失败：文件过小"
           exit 1
         fi
 
-    # 2. 使用 compile 命令编译 JSON (这是最稳的方法)
-    - name: Compile JSON to SRS
+    # 2. 使用 Python 将纯域名列表转换为 Sing-box JSON
+    # 这是最关键的一步，手动构造 JSON，100% 可控
+    - name: Convert to Sing-box JSON
       run: |
-        echo "🔨 正在编译 (Compile) JSON -> SRS ..."
-        # 注意：这里用的是 compile，不是 convert
+        python3 -c '
+        import json
+        
+        input_file = "pro.plus.txt"
+        output_file = "hagezi_pro_plus.json"
+        
+        domains = []
+        
+        with open(input_file, "r") as f:
+            for line in f:
+                line = line.strip()
+                # 忽略注释和空行
+                if not line or line.startswith("#"):
+                    continue
+                domains.append(line)
+        
+        print(f"✅ 提取到 {len(domains)} 个域名")
+        
+        # 构造 Sing-box 规则结构
+        data = {
+            "version": 1,
+            "rules": [
+                {
+                    "domain": domains
+                }
+            ]
+        }
+        
+        with open(output_file, "w") as f:
+            json.dump(data, f)
+        '
+
+    # 3. 编译 JSON 为 SRS
+    - name: Compile to SRS
+      run: |
+        echo "🔨 正在编译..."
         sing-box rule-set compile --output hagezi_pro_plus_adblock.srs hagezi_pro_plus.json
         
-        # 检查结果
-        echo "📊 编译结果："
+        echo "📊 结果检查："
         ls -lh hagezi_pro_plus_adblock.srs
         
-        srs_size=$(wc -c <"hagezi_pro_plus_adblock.srs")
-        # 正常的 srs 文件应该有几 MB
-        if [ $srs_size -lt 10240 ]; then
-          echo "❌ 编译失败：生成的 SRS 文件几乎是空的 ($srs_size bytes)"
+        # 确保文件大小正常 (几MB)
+        if [ $(wc -c <"hagezi_pro_plus_adblock.srs") -lt 102400 ]; then
+          echo "❌ 编译失败：文件依然太小"
           exit 1
         fi
-        echo "✅ 编译成功！"
 
     - name: Commit and Push
       run: |
@@ -67,9 +99,9 @@ jobs:
         git add hagezi_pro_plus_adblock.srs
         
         if git diff --cached --quiet; then
-          echo "⚠️ 规则无变化，跳过提交"
+          echo "⚠️ 规则无变化"
         else
-          git commit -m "Auto-update: HaGeZi Pro++ (JSON Source)"
+          git commit -m "Auto-update: HaGeZi Pro++"
           git pull --rebase origin main
           git push
         fi
@@ -78,4 +110,4 @@ jobs:
 
     - name: Clean up
       run: |
-        rm -f hagezi_pro_plus.json
+        rm -f pro.plus.txt hagezi_pro_plus.json
