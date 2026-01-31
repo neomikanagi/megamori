@@ -1,9 +1,12 @@
-name: HaGeZi's The World's Most Abused TLDs
+name: HaGeZi's Spam TLDs (Fixed)
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 */8 * * *'  # Run every 8 hours
+    - cron: '0 */12 * * *'
+
+permissions:
+  contents: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -14,56 +17,60 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Checkout the repository
     - name: Checkout code
       uses: actions/checkout@v4
       with:
-        fetch-depth: 0  # Fetch full history to enable rebase
+        fetch-depth: 0
 
-    # Step 2: Install Sing-Box
-    - name: Install Sing-Box
+    # 1. 安装稳健的 v1.11.4 版本
+    - name: Install Sing-Box v1.11.4
       run: |
-        bash <(curl -fsSL https://sing-box.app/deb-install.sh)
+        echo "⬇️ 正在安装 Sing-box v1.11.4 ..."
+        wget https://github.com/SagerNet/sing-box/releases/download/v1.11.4/sing-box_1.11.4_linux_amd64.deb
+        sudo dpkg -i sing-box_1.11.4_linux_amd64.deb
+        sing-box version
 
-    # Step 3: Download HaGeZi Spam TLDs Adblock Filter
-    - name: Download HaGeZi Spam TLDs Adblock Filter
+    # 2. 下载规则 (使用 GitHub Raw 源更稳定)
+    - name: Download Filter
       run: |
-        curl -o hagezi_spam_tlds_adblock.txt https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/adblock/spam-tlds.txt
+        echo "⬇️ 正在下载规则..."
+        curl -fSL -o hagezi_spam_tlds_adblock.txt https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/spam-tlds.txt
+        
+        ls -lh hagezi_spam_tlds_adblock.txt
+        if [ $(wc -c <"hagezi_spam_tlds_adblock.txt") -lt 1024 ]; then
+          echo "❌ 下载失败：文件太小"
+          exit 1
+        fi
 
-    # Step 4: Convert HaGeZi Spam TLDs Adblock Filter to SRS format
-    - name: Convert HaGeZi Spam TLDs Adblock Filter to hagezi_spam_tlds_adblock.srs
+    # 3. 转换
+    - name: Convert to SRS
       run: |
+        echo "🔄 正在转换..."
         sing-box rule-set convert --type adguard --output hagezi_spam_tlds_adblock.srs hagezi_spam_tlds_adblock.txt
+        
+        ls -lh hagezi_spam_tlds_adblock.srs
+        if [ $(wc -c <"hagezi_spam_tlds_adblock.srs") -lt 1024 ]; then
+          echo "❌ 转换失败：生成了空文件"
+          exit 1
+        fi
+        echo "✅ 转换成功"
 
-    # Step 5: Debug working directory
-    - name: Debug git status
-      run: |
-        git status
-        git diff
-
-    # Step 6: Commit changes before pulling
-    - name: Commit changes before pulling
+    - name: Commit and Push
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git add hagezi_spam_tlds_adblock.srs
+        
         if git diff --cached --quiet; then
-          echo "No changes detected, skipping commit."
+          echo "⚠️ 规则无变化"
         else
-          git commit -m "Auto-update hagezi_spam_tlds_adblock.srs before pull"
+          git commit -m "Auto-update: HaGeZi Spam TLDs"
+          git pull --rebase origin main
+          git push
         fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    # Step 7: Pull latest changes and push if necessary
-    - name: Pull and push changes
-      run: |
-        git pull --rebase origin main  # Pull latest changes
-        git push
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    # Step 8: Clean up temporary files
     - name: Clean up
       run: |
-        rm -f hagezi_spam_tlds_adblock.txt
+        rm -f hagezi_spam_tlds_adblock.txt sing-box_1.11.4_linux_amd64.deb
