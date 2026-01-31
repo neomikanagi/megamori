@@ -1,11 +1,11 @@
-name: HaGeZi's Pro++ DNS Blocklist
+name: HaGeZi's Pro++ DNS Blocklist (Debug Mode)
 
 on:
   workflow_dispatch:        # 允许手动触发
   schedule:
-    - cron: '0 */12 * * *'  # 每12小时运行一次（8小时也可以，但12小时更稳）
+    - cron: '0 */12 * * *'  # 每12小时自动运行
 
-# 关键：赋予 GITHUB_TOKEN 写权限，否则无法提交代码
+# 必须赋予写权限，否则无法提交
 permissions:
   contents: write
 
@@ -24,36 +24,57 @@ jobs:
       with:
         fetch-depth: 0
 
-    # 2. 安装 Sing-Box (使用官方安装脚本)
+    # 2. 安装 Sing-Box
     - name: Install Sing-Box
       run: |
+        echo "⬇️ 正在安装 Sing-box..."
         bash <(curl -fsSL https://sing-box.app/deb-install.sh)
+        sing-box version
 
-    # 3. 下载规则 (核心修复步骤)
+    # 3. 下载规则 (带大小检查)
     - name: Download HaGeZi Pro Plus Adblock Filter
       run: |
-        echo "正在下载规则..."
-        # 使用 -f (失败报错) -L (跟随重定向)
-        # 地址修正为 HaGeZi 的 GitHub 官方源，确保路径正确
+        echo "⬇️ 正在从 GitHub 官方源下载规则..."
+        # 使用 -fSL 确保遇到 404 直接报错
         curl -fSL -o hagezi_pro_plus_adblock.txt https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/pro.plus.txt
         
-        # --- 安全检查开始 ---
-        # 获取文件大小
-        filesize=$(wc -c <"hagezi_pro_plus_adblock.txt")
-        echo "下载文件大小: $filesize bytes"
+        # --- 调试：打印文件详情 ---
+        echo "📊 下载后的 TXT 文件信息："
+        ls -lh hagezi_pro_plus_adblock.txt
         
-        # HaGeZi Pro++ 通常很大(几MB)，如果小于 50KB (51200 bytes) 说明下载绝对出错了
+        # --- 安全熔断检查 ---
+        filesize=$(wc -c <"hagezi_pro_plus_adblock.txt")
+        # 如果文件小于 50KB (正常应该有好几 MB)，强制报错
         if [ $filesize -lt 51200 ]; then
-          echo "❌ 错误: 文件太小 ($filesize bytes)，可能是 404 页面或网络错误，停止编译！"
+          echo "❌ 严重错误：下载的源文件太小 ($filesize bytes)，可能是网络问题或 404，终止运行！"
           exit 1
         fi
-        echo "✅ 文件检查通过，准备编译。"
+        echo "✅ 源文件大小正常，准备转换。"
 
-    # 4. 转换规则为 SRS 格式
+    # 4. 转换规则 (带结果检查)
     - name: Convert to SRS
       run: |
-        # HaGeZi 的 txt 格式通常兼容 adguard 语法
+        echo "🔄 正在转换格式 (TXT -> SRS)..."
+        # 使用 adguard 类型进行转换
         sing-box rule-set convert --type adguard --output hagezi_pro_plus_adblock.srs hagezi_pro_plus_adblock.txt
+        
+        # --- 调试：打印转换后的文件详情 ---
+        echo "📊 转换后的 SRS 文件信息："
+        ls -lh hagezi_pro_plus_adblock.srs
+        
+        # --- 安全熔断检查 ---
+        if [ ! -f hagezi_pro_plus_adblock.srs ]; then
+             echo "❌ 严重错误：SRS 文件未能生成！"
+             exit 1
+        fi
+        
+        srs_size=$(wc -c <"hagezi_pro_plus_adblock.srs")
+        # 如果转换出的二进制文件小于 1KB，说明转换失败了
+        if [ $srs_size -lt 1024 ]; then
+          echo "❌ 严重错误：转换失败，生成的 SRS 文件几乎是空的 ($srs_size bytes)，禁止提交！"
+          exit 1
+        fi
+        echo "✅ 转换成功，SRS 文件有效。"
 
     # 5. 提交并推送
     - name: Commit and Push
@@ -61,24 +82,29 @@ jobs:
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         
-        # 强制添加，确保文件被追踪
+        # 强制将生成的文件添加到暂存区
         git add hagezi_pro_plus_adblock.srs
         
-        # 检查是否有变动
+        echo "🧐 正在检查 Git 状态..."
+        git status
+        
+        # 检查是否有变化
         if git diff --cached --quiet; then
-          echo "⚠️ 规则没有变化，跳过提交。"
+          echo "⚠️ 仓库中的文件与新生成的文件完全一致，没有变化，跳过提交。"
+          echo "💡 这意味着：你仓库里现有的文件已经是好的了(或者和新生成的一样)。"
         else
-          echo "检测到规则更新，正在提交..."
+          echo "🚀 检测到规则更新，文件大小已变化，正在提交..."
           git commit -m "Auto-update: HaGeZi Pro++ ($(date +'%Y-%m-%d %H:%M'))"
           
-          # 拉取最新代码防止冲突，然后推送
+          # 拉取最新代码防止冲突
           git pull --rebase origin main
           git push
+          echo "✅ 推送完成！"
         fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    # 6. 清理临时文件
+    # 6. 清理
     - name: Clean up
       run: |
         rm -f hagezi_pro_plus_adblock.txt
