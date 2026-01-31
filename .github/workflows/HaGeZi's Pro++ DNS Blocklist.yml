@@ -1,14 +1,3 @@
-name: HaGeZi's Pro++ DNS Blocklist
-
-on:
-  workflow_dispatch:
-  schedule:
-    - cron: '0 */8 * * *'  # Run every 8 hours
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   install-and-compile:
     runs-on: ubuntu-latest
@@ -18,31 +7,36 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
-        fetch-depth: 0  # Fetch full history to enable rebase
+        fetch-depth: 0
 
     # Step 2: Install Sing-Box
     - name: Install Sing-Box
       run: |
         bash <(curl -fsSL https://sing-box.app/deb-install.sh)
 
-    # Step 3: Download HaGeZi Pro Plus Adblock Filter
+    # Step 3: Download HaGeZi Pro Plus (关键修改)
     - name: Download HaGeZi Pro Plus Adblock Filter
       run: |
-        curl -o hagezi_pro_plus_adblock.txt https://gitlab.com/hagezi/mirror/-/raw/main/dns-blocklists/adblock/pro.plus.txt
+        echo "Starting download..."
+        # 使用 -fSL 参数：Fail on error, Silent, Follow redirects
+        # 换成了 GitHub 官方源，路径更稳定
+        curl -fSL -o hagezi_pro_plus_adblock.txt https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/pro.plus.txt
+        
+        # 关键安全检查：如果文件太小（比如只有报错信息），直接强制失败，不继续执行
+        filesize=$(wc -c <"hagezi_pro_plus_adblock.txt")
+        echo "Downloaded file size: $filesize bytes"
+        if [ $filesize -lt 1024 ]; then
+          echo "Error: File is too small ($filesize bytes). Download likely failed."
+          exit 1
+        fi
 
-    # Step 4: Convert HaGeZi Pro Plus Adblock Filter to SRS format
-    - name: Convert HaGeZi Pro Plus Adblock Filter to hagezi_pro_plus_adblock.srs
+    # Step 4: Convert (保持不变，但现在输入文件肯定是安全的)
+    - name: Convert to SRS
       run: |
         sing-box rule-set convert --type adguard --output hagezi_pro_plus_adblock.srs hagezi_pro_plus_adblock.txt
 
-    # Step 5: Debug working directory
-    - name: Debug git status
-      run: |
-        git status
-        git diff
-
-    # Step 6: Commit changes before pulling
-    - name: Commit changes before pulling
+    # Step 5: Git Commit & Push (保持不变)
+    - name: Commit and Push
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
@@ -50,20 +44,14 @@ jobs:
         if git diff --cached --quiet; then
           echo "No changes detected, skipping commit."
         else
-          git commit -m "Auto-update hagezi_pro_plus_adblock.srs before pull"
+          git commit -m "Auto-update hagezi_pro_plus_adblock.srs"
+          git pull --rebase origin main
+          git push
         fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    # Step 7: Pull latest changes and push if necessary
-    - name: Pull and push changes
-      run: |
-        git pull --rebase origin main  # Pull latest changes
-        git push
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    # Step 8: Clean up temporary files
+    # Step 6: Clean up
     - name: Clean up
       run: |
         rm -f hagezi_pro_plus_adblock.txt
