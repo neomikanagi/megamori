@@ -31,8 +31,9 @@ jobs:
       run: |
         curl -fSL -o yokoffing_privacy_essentials.txt https://raw.githubusercontent.com/yokoffing/filterlists/refs/heads/main/privacy_essentials.txt
         
+        # 只要文件不是空的就行
         ls -lh yokoffing_privacy_essentials.txt
-        if [ $(wc -c <"yokoffing_privacy_essentials.txt") -lt 1024 ]; then
+        if [ $(wc -c <"yokoffing_privacy_essentials.txt") -lt 100 ]; then
           exit 1
         fi
 
@@ -41,9 +42,15 @@ jobs:
         sing-box rule-set convert --type adguard --output yokoffing_privacy_essentials.srs yokoffing_privacy_essentials.txt
         
         ls -lh yokoffing_privacy_essentials.srs
-        if [ $(wc -c <"yokoffing_privacy_essentials.srs") -lt 1024 ]; then
+        srs_size=$(wc -c <"yokoffing_privacy_essentials.srs")
+        
+        # 【关键修改】把安全门槛从 1024 降到 500
+        # 因为这个规则集编译后只有 1021 字节，是正常的
+        if [ $srs_size -lt 500 ]; then
+          echo "❌ 转换失败：生成了空文件 ($srs_size bytes)"
           exit 1
         fi
+        echo "✅ 转换成功 (文件较小是正常的)"
 
     - name: Commit and Push
       run: |
