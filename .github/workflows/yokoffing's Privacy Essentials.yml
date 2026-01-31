@@ -1,9 +1,12 @@
-name: yokoffing's Privacy Essentials
+name: yokoffing's Privacy Essentials (Fixed)
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 */8 * * *'  # Run every 8 hours
+    - cron: '0 */12 * * *'
+
+permissions:
+  contents: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -14,56 +17,50 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Checkout the repository
     - name: Checkout code
       uses: actions/checkout@v4
       with:
-        fetch-depth: 0  # Fetch full history to enable rebase
+        fetch-depth: 0
 
-    # Step 2: Install Sing-Box
-    - name: Install Sing-Box
+    - name: Install Sing-Box v1.11.4
       run: |
-        bash <(curl -fsSL https://sing-box.app/deb-install.sh)
+        wget https://github.com/SagerNet/sing-box/releases/download/v1.11.4/sing-box_1.11.4_linux_amd64.deb
+        sudo dpkg -i sing-box_1.11.4_linux_amd64.deb
 
-    # Step 3: Download yokoffing's Privacy Essentials Filter
-    - name: Download yokoffing's Privacy Essentials Filter
+    - name: Download Filter
       run: |
-        curl -o yokoffing_privacy_essentials.txt https://raw.githubusercontent.com/yokoffing/filterlists/refs/heads/main/privacy_essentials.txt
+        curl -fSL -o yokoffing_privacy_essentials.txt https://raw.githubusercontent.com/yokoffing/filterlists/refs/heads/main/privacy_essentials.txt
+        
+        ls -lh yokoffing_privacy_essentials.txt
+        if [ $(wc -c <"yokoffing_privacy_essentials.txt") -lt 1024 ]; then
+          exit 1
+        fi
 
-    # Step 4: Convert yokoffing's Privacy Essentials Filter to SRS format
-    - name: Convert yokoffing's Privacy Essentials Filter to yokoffing_privacy_essentials.srs
+    - name: Convert to SRS
       run: |
         sing-box rule-set convert --type adguard --output yokoffing_privacy_essentials.srs yokoffing_privacy_essentials.txt
+        
+        ls -lh yokoffing_privacy_essentials.srs
+        if [ $(wc -c <"yokoffing_privacy_essentials.srs") -lt 1024 ]; then
+          exit 1
+        fi
 
-    # Step 5: Debug working directory
-    - name: Debug git status
-      run: |
-        git status
-        git diff
-
-    # Step 6: Commit changes before pulling
-    - name: Commit changes before pulling
+    - name: Commit and Push
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git add yokoffing_privacy_essentials.srs
+        
         if git diff --cached --quiet; then
-          echo "No changes detected, skipping commit."
+          echo "No changes"
         else
-          git commit -m "Auto-update yokoffing_privacy_essentials.srs before pull"
+          git commit -m "Auto-update: Yokoffing Privacy"
+          git pull --rebase origin main
+          git push
         fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    # Step 7: Pull latest changes and push if necessary
-    - name: Pull and push changes
-      run: |
-        git pull --rebase origin main  # Pull latest changes
-        git push
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    # Step 8: Clean up temporary files
     - name: Clean up
       run: |
-        rm -f yokoffing_privacy_essentials.txt
+        rm -f yokoffing_privacy_essentials.txt sing-box_1.11.4_linux_amd64.deb
