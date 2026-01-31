@@ -1,4 +1,4 @@
-name: HaGeZi's Pro++ DNS Blocklist (Final)
+name: HaGeZi's Pro++ (Sing-box v1.11.4)
 
 on:
   workflow_dispatch:
@@ -22,75 +22,47 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Install Sing-Box
+    # 1. 强制安装旧版本 v1.11.4
+    # 你的直觉是对的，新版本可能对 AdGuard 格式解析有 Bug
+    - name: Install Sing-Box v1.11.4
       run: |
-        bash <(curl -fsSL https://sing-box.app/deb-install.sh)
-
-    # 1. 下载纯域名格式 (Domains Format)
-    # 这种格式最干净，只有域名，没有干扰 Sing-box 的特殊符号
-    - name: Download HaGeZi Pro Plus (Domains)
-      run: |
-        echo "⬇️ 正在下载纯域名列表..."
-        # 这是 HaGeZi 官方的 Domains 格式链接
-        curl -fSL -o pro.plus.txt https://raw.githubusercontent.com/hagezi/dns-blocklists/main/domains/pro.plus.txt
+        echo "⬇️ 正在安装 Sing-box v1.11.4 ..."
+        # 手动下载指定版本的 deb 包
+        wget https://github.com/SagerNet/sing-box/releases/download/v1.11.4/sing-box_1.11.4_linux_amd64.deb
+        sudo dpkg -i sing-box_1.11.4_linux_amd64.deb
         
-        ls -lh pro.plus.txt
-        # 简单检查大小
-        if [ $(wc -c <"pro.plus.txt") -lt 102400 ]; then
-          echo "❌ 下载失败：文件过小"
+        # 验证版本
+        sing-box version
+
+    # 2. 下载 HaGeZi Pro Plus (Adblock 格式)
+    - name: Download HaGeZi Pro Plus
+      run: |
+        echo "⬇️ 正在下载规则..."
+        curl -fSL -o hagezi_pro_plus_adblock.txt https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/pro.plus.txt
+        
+        # 安全检查
+        filesize=$(wc -c <"hagezi_pro_plus_adblock.txt")
+        if [ $filesize -lt 102400 ]; then
+          echo "❌ 下载失败：文件太小"
           exit 1
         fi
 
-    # 2. 使用 Python 将纯域名列表转换为 Sing-box JSON
-    # 这是最关键的一步，手动构造 JSON，100% 可控
-    - name: Convert to Sing-box JSON
+    # 3. 转换 (使用旧版本 Sing-box)
+    - name: Convert to SRS
       run: |
-        python3 -c '
-        import json
+        echo "🔄 正在使用 Sing-box v1.11.4 转换..."
+        sing-box rule-set convert --type adguard --output hagezi_pro_plus_adblock.srs hagezi_pro_plus_adblock.txt
         
-        input_file = "pro.plus.txt"
-        output_file = "hagezi_pro_plus.json"
-        
-        domains = []
-        
-        with open(input_file, "r") as f:
-            for line in f:
-                line = line.strip()
-                # 忽略注释和空行
-                if not line or line.startswith("#"):
-                    continue
-                domains.append(line)
-        
-        print(f"✅ 提取到 {len(domains)} 个域名")
-        
-        # 构造 Sing-box 规则结构
-        data = {
-            "version": 1,
-            "rules": [
-                {
-                    "domain": domains
-                }
-            ]
-        }
-        
-        with open(output_file, "w") as f:
-            json.dump(data, f)
-        '
-
-    # 3. 编译 JSON 为 SRS
-    - name: Compile to SRS
-      run: |
-        echo "🔨 正在编译..."
-        sing-box rule-set compile --output hagezi_pro_plus_adblock.srs hagezi_pro_plus.json
-        
-        echo "📊 结果检查："
+        echo "📊 转换结果检查："
         ls -lh hagezi_pro_plus_adblock.srs
         
-        # 确保文件大小正常 (几MB)
-        if [ $(wc -c <"hagezi_pro_plus_adblock.srs") -lt 102400 ]; then
-          echo "❌ 编译失败：文件依然太小"
+        srs_size=$(wc -c <"hagezi_pro_plus_adblock.srs")
+        # 如果还是 21 字节，那就是命了
+        if [ $srs_size -lt 1024 ]; then
+          echo "❌ 转换失败：哪怕用 v1.11.4 生成的文件依然是空的 ($srs_size bytes)"
           exit 1
         fi
+        echo "✅ 转换成功！看来确实是新版本的锅。"
 
     - name: Commit and Push
       run: |
@@ -101,7 +73,7 @@ jobs:
         if git diff --cached --quiet; then
           echo "⚠️ 规则无变化"
         else
-          git commit -m "Auto-update: HaGeZi Pro++"
+          git commit -m "Auto-update: HaGeZi Pro++ (Sing-box v1.11.4)"
           git pull --rebase origin main
           git push
         fi
@@ -110,4 +82,4 @@ jobs:
 
     - name: Clean up
       run: |
-        rm -f pro.plus.txt hagezi_pro_plus.json
+        rm -f hagezi_pro_plus_adblock.txt sing-box_1.11.4_linux_amd64.deb
