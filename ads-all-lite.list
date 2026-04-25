@@ -1444,6 +1444,7 @@ DOMAIN-SUFFIX,acyclovir.1.p2l.info
 DOMAIN-SUFFIX,ad-411.com
 DOMAIN-SUFFIX,ad-adapex.io
 DOMAIN-SUFFIX,ad-arrow.com
+DOMAIN-SUFFIX,ad-blocker-1.static-cloudflare.workers.dev
 DOMAIN-SUFFIX,ad-clicks.com
 DOMAIN-SUFFIX,ad-drop.jp
 DOMAIN-SUFFIX,ad-ebis.bookpass.auone.jp
@@ -2288,6 +2289,7 @@ DOMAIN-SUFFIX,adtracker.oilpainting.colorbynumber.veraxen.com
 DOMAIN-SUFFIX,adtracking.vinden.nl
 DOMAIN-SUFFIX,adtrak.net
 DOMAIN-SUFFIX,adtrcdn.io
+DOMAIN-SUFFIX,adunblock1.static-cloudflare.workers.dev
 DOMAIN-SUFFIX,adv.imadrep.co.kr
 DOMAIN-SUFFIX,adv.lampsplus.com
 DOMAIN-SUFFIX,adv.merlin.co.il
@@ -18772,7 +18774,9 @@ DOMAIN-SUFFIX,inconelcatalos.com
 DOMAIN-SUFFIX,inconsistencygasdifficult.com
 DOMAIN-SUFFIX,incordacclaim.cfd
 DOMAIN-SUFFIX,incpsdodlr.com
+DOMAIN-SUFFIX,increaserev2.static-cloudflare.workers.dev
 DOMAIN-SUFFIX,increaserev3.static-cloudflare.workers.dev
+DOMAIN-SUFFIX,increaserev4.static-cloudflare.workers.dev
 DOMAIN-SUFFIX,increasingcustomers-tag.com
 DOMAIN-SUFFIX,increasinglycockroachpolicy.com
 DOMAIN-SUFFIX,incredibleenhancementslightning.com
@@ -23650,7 +23654,6 @@ DOMAIN-SUFFIX,load.stape.alemdagenetica.com.br
 DOMAIN-SUFFIX,load.stape.alura.com.br
 DOMAIN-SUFFIX,load.stape.boddlelearning.com
 DOMAIN-SUFFIX,load.stape.carolinamorilhaccp.com.br
-DOMAIN-SUFFIX,load.stape.cips.org
 DOMAIN-SUFFIX,load.stape.dracarlateixeira.com.br
 DOMAIN-SUFFIX,load.stape.easyfxtrading.com
 DOMAIN-SUFFIX,load.stape.finora.fi
@@ -46408,7 +46411,6 @@ DOMAIN-SUFFIX,winmomo.com
 DOMAIN-SUFFIX,winner-prize.com
 DOMAIN-SUFFIX,winnerspinz.com
 DOMAIN-SUFFIX,winonahoras.shop
-DOMAIN-SUFFIX,winonascards.com
 DOMAIN-SUFFIX,winr.online
 DOMAIN-SUFFIX,winsomemerlion.qpon
 DOMAIN-SUFFIX,winstonromain.cfd
