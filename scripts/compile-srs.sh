@@ -11,9 +11,9 @@ set -euo pipefail
 # Format: output_filename | minimum_srs_size_bytes | URL1 | URL2 | ...
 declare -a RULE_SETS=(
     "megamori.srs|1024|https://raw.githubusercontent.com/217heidai/adblockfilters/main/rules/adblockdns.txt"
-    "hagezi_pro_plus_adblock.srs|1024|https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/pro.plus.txt"
-    "hagezi_spam_tlds_adblock.srs|1024|https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/spam-tlds.txt"
-    "hagezi_tif_adblock.srs|1024|https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/tif.txt"
+    "hagezi_pro_plus_adblock.srs|1024|https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/adblock/pro.plus.txt"
+    "hagezi_spam_tlds_adblock.srs|1024|https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/adblock/spam-tlds.txt"
+    "hagezi_tif_adblock.srs|1024|https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/adblock/tif.txt"
     "yokoffing_privacy_essentials.srs|500|https://raw.githubusercontent.com/yokoffing/filterlists/refs/heads/main/privacy_essentials.txt"
     "respect_my_internet.srs|1024|https://raw.githubusercontent.com/DXC-0/Respect-My-Internet/main/blocklist/respect-my-internet.txt"
     "adguard_japanese.srs|1024|https://adguardteam.github.io/AdguardFilters/JapaneseFilter/sections/adservers.txt|https://adguardteam.github.io/AdguardFilters/JapaneseFilter/sections/adservers_firstparty.txt"
