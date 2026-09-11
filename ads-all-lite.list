@@ -7686,8 +7686,6 @@ DOMAIN-SUFFIX,filter.expialidosius.com
 DOMAIN-SUFFIX,filter.giantpanda.media
 DOMAIN-SUFFIX,filter.high-on-ads.com
 DOMAIN-SUFFIX,filter.highsea.fun
-DOMAIN-SUFFIX,filter.inptr.com
-DOMAIN-SUFFIX,filter.kvicads.com
 DOMAIN-SUFFIX,filter.leoback.com
 DOMAIN-SUFFIX,filter.mediastinct.com
 DOMAIN-SUFFIX,filter.nexrtb.com
@@ -23101,7 +23099,6 @@ DOMAIN-SUFFIX,xml-eu-v4.dollopsdigital.com
 DOMAIN-SUFFIX,xml-eu-v4.epikads.com
 DOMAIN-SUFFIX,xml-eu-v4.goclickz.net
 DOMAIN-SUFFIX,xml-eu-v4.high-on-ads.com
-DOMAIN-SUFFIX,xml-eu-v4.kvicads.com
 DOMAIN-SUFFIX,xml-eu-v4.ldnpointer.online
 DOMAIN-SUFFIX,xml-eu-v4.nexrtb.com
 DOMAIN-SUFFIX,xml-eu-v4.optumads.com
@@ -23160,8 +23157,6 @@ DOMAIN-SUFFIX,xml-v4.giantpanda.media
 DOMAIN-SUFFIX,xml-v4.glcsrv.com
 DOMAIN-SUFFIX,xml-v4.goclickz.net
 DOMAIN-SUFFIX,xml-v4.high-on-ads.com
-DOMAIN-SUFFIX,xml-v4.inptr.com
-DOMAIN-SUFFIX,xml-v4.kvicads.com
 DOMAIN-SUFFIX,xml-v4.ldnpointer.online
 DOMAIN-SUFFIX,xml-v4.nexrtb.com
 DOMAIN-SUFFIX,xml-v4.optargone-3.online
